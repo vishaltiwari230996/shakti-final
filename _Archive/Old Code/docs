@@ -1,0 +1,63 @@
+# Fix Frontend-Backend Communication
+
+## ✅ The Issue
+The frontend was trying to call `/api/...` on the **frontend server** (Vercel) instead of the **backend server** (Render).
+- In development, `vite.config.js` proxies these requests.
+- In production, Vercel doesn't know about the backend, so it returns 404 or the index page.
+
+## 🔧 The Fix
+I've updated `src/main.jsx` to tell Axios (the library making requests) to use your backend URL.
+
+```javascript
+axios.defaults.baseURL = import.meta.env.VITE_API_URL || '';
+```
+
+Now:
+- **Development**: Uses relative paths (proxied by Vite)
+- **Production**: Uses `https://your-backend.onrender.com` (from your Vercel env var)
+
+## 🚀 How to Deploy the Fix
+
+1. **Open GitHub Desktop**
+   - Switch to `shakti-frontend` repository
+
+2. **Commit the Change**
+   - You'll see `src/main.jsx` modified
+   - Summary: `Fix API connection - configure Axios baseURL`
+   - Click `Commit to main`
+
+3. **Push to GitHub**
+   - Click `Push origin`
+
+4. **Wait for Redeploy**
+   - Vercel will redeploy automatically (1-2 mins)
+
+## ⚠️ Critical Check: Environment Variable
+
+For this to work, you **MUST** have the environment variable set in Vercel:
+
+1. Go to Vercel Dashboard
+2. Select your project
+3. Go to **Settings** → **Environment Variables**
+4. Check for `VITE_API_URL`
+   - **Value**: `https://your-backend-name.onrender.com` (NO trailing slash)
+   - **Value**: `https://shakti-backend.onrender.com` (Example)
+
+**If you need to add/change it:**
+1. Add/Edit the variable
+2. Go to **Deployments** tab
+3. Click the three dots on the latest deployment
+4. Select **Redeploy** (Variables only take effect on new builds)
+
+## 🧪 Verification
+
+After redeployment:
+1. Open your app
+2. Open Browser Console (F12)
+3. Go to Network tab
+4. Refresh page
+5. Check any API request (like `prompt-templates`)
+   - **Correct**: URL starts with `https://your-backend...`
+   - **Incorrect**: URL starts with `https://your-frontend...`
+
+Let me know once you've pushed this change! 🚀
